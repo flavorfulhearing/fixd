@@ -4,17 +4,29 @@ const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN
 });
 
+async function getDefaultBranchCommitSha(owner, repoName) {
+    const defaultBranch = (await octokit.rest.repos.get({ owner, repo: repoName })).data.default_branch;
+    const defaultBranchRef = await octokit.rest.git.getRef({
+        owner,
+        repo: repoName,
+        ref: `heads/${defaultBranch}`
+    });
+    return defaultBranchRef.data.object.sha;
+}
+
 export const createPullRequest = async (repo, title, code) => {
     try {
         const [owner, repoName] = repo.split('/');
         const branchName = `issue-${Date.now()}`;
+
+        const commitSha = await getDefaultBranchCommitSha(owner, repoName);
 
         // Create a new branch
         await octokit.rest.git.createRef({
             owner,
             repo: repoName,
             ref: `refs/heads/${branchName}`,
-            sha: (await octokit.rest.repos.get({ owner, repo: repoName })).data.default_branch
+            sha: commitSha  
         });
 
         // Create a file and commit it
