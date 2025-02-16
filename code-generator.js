@@ -1,17 +1,26 @@
 export const createGenerateCode = (openai) => {
-    return async (title, body) => {
+    return async (issueTitle, issueBody, repoFiles) => {
         try {
-            const completion = await openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
-                messages: [
-                    { 
-                        role: "user", 
-                        content: `Generate code for: ${title}\n\nDetails: ${body}` 
-                    }
-                ]
+            const context = repoFiles.map(f => `### ${f.filename}\n${f.content.slice(0, 500)}`).join("\n\n"); // Limit file size
+
+            const prompt = `
+                You are an AI assistant helping to fix issues in a GitHub repository.
+                Here are some relevant files:
+                ${context}
+        
+                The issue reported is:
+                Title: ${issueTitle}
+                Description: ${issueBody}
+        
+                Suggest a code fix based on the provided files.
+            `;
+            const response = await openai.chat.completions.create({
+                model: "gpt-4",
+                messages: [{ role: "system", content: prompt }],
+                max_tokens: 500
             });
-            
-            return completion.choices[0].message.content;
+        
+            return response.choices[0].message.content.trim();
         } catch (error) {
             console.error('Error generating code:', error);
             throw error;
