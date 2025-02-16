@@ -23,3 +23,6 @@ yarn-error.log
 .Trashes
 ehthumbs.db
 Thumbs.db 
+
+# Test files
+test_curl.sh
