@@ -3,7 +3,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { OpenAI } from 'openai';
 import { createGenerateCode } from './code-generator.js';
-
+import { createPullRequest } from './pull-requester.js';
 const app = express();
 app.use(bodyParser.json());
 
@@ -26,6 +26,7 @@ app.post('/webhook', async (req, res) => {
             console.log(`New issue detected: ${issueTitle}`);
 
             const generatedCode = await generateCode(issueTitle, issueBody);
+            const pullRequest = await createPullRequest(repo, issueTitle, generatedCode);
 
             res.status(200).json({ 
                 message: "Pull request created!",
