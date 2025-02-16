@@ -1,9 +1,18 @@
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const { generateCode } = require('./code-generator');
+import 'dotenv/config';
+import express from 'express';
+import bodyParser from 'body-parser';
+import { OpenAI } from 'openai';
+import { createGenerateCode } from './code-generator.js';
+
 const app = express();
 app.use(bodyParser.json());
+
+// Initialize OpenAI once
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+});
+// Create the generateCode function with openai instance
+const generateCode = createGenerateCode(openai);
 
 app.post('/webhook', async (req, res) => {
     try {

@@ -1,15 +1,20 @@
-const OpenAI = require('openai');
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-async function generateCode(issueTitle, issueBody) {
-    const prompt = `Generate a simple solution for the following GitHub issue:\nTitle: ${issueTitle}\nDescription: ${issueBody}`;
-    const response = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [{ role: "system", content: prompt }],
-        max_tokens: 200
-    });
-
-    return response.choices[0].message.content.trim();
-}
-
-module.exports = { generateCode };
+export const createGenerateCode = (openai) => {
+    return async (title, body) => {
+        try {
+            const completion = await openai.chat.completions.create({
+                model: "gpt-3.5-turbo",
+                messages: [
+                    { 
+                        role: "user", 
+                        content: `Generate code for: ${title}\n\nDetails: ${body}` 
+                    }
+                ]
+            });
+            
+            return completion.choices[0].message.content;
+        } catch (error) {
+            console.error('Error generating code:', error);
+            throw error;
+        }
+    };
+};
