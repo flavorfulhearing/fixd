@@ -25,6 +25,7 @@ app.post('/webhook', async (req, res) => {
             
             console.log(`New issue detected: ${issueTitle}`);
 
+            // TODO: Use the generateCode function to actually generate the code
             const generatedCode = "hello world";
             const pullRequest = await createPullRequest(repo, issueTitle, generatedCode);
 
