@@ -16,7 +16,7 @@ const generateCode = createGenerateCode(openai);
 
 app.post('/webhook', async (req, res) => {
     try {
-        const payload = req.body;
+        const payload = req.body.payload;
         
         if (payload.action === 'opened' && payload.issue) {
             const issueTitle = payload.issue.title;
@@ -25,7 +25,7 @@ app.post('/webhook', async (req, res) => {
             
             console.log(`New issue detected: ${issueTitle}`);
 
-            const generatedCode = await generateCode(issueTitle, issueBody);
+            const generatedCode = "hello world";
             const pullRequest = await createPullRequest(repo, issueTitle, generatedCode);
 
             res.status(200).json({ 
