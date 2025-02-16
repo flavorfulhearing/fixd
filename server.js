@@ -1,22 +1,35 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
 const app = express();
+
 app.use(bodyParser.json());
 
 app.post('/webhook', async (req, res) => {
-    const payload = req.body;
-    
-    if (payload.action === 'opened' && payload.issue) {
-        const issueTitle = payload.issue.title;
-        const issueBody = payload.issue.body;
-        const repo = payload.repository.full_name;
+    try {
+        const payload = req.body;
         
-        console.log(`New issue detected: ${issueTitle}`);
+        if (payload.action === 'opened' && payload.issue) {
+            const issueTitle = payload.issue.title;
+            const issueBody = payload.issue.body;
+            const repo = payload.repository.full_name;
+            
+            console.log(`New issue detected: ${issueTitle}`);
 
-        res.status(200).send("Pull request created!");
-    } else {
-        res.status(200).send("No action taken.");
+            // TODO: Generate code solution using OpenAI
+
+            res.status(200).json({ 
+                message: "Pull request created!",
+                code: generatedCode 
+            });
+        } else {
+            res.status(200).json({ message: "No action taken." });
+        }
+    } catch (error) {
+        console.error('Error processing webhook:', error);
+        res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message 
+        });
     }
 });
 
