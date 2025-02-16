@@ -10,15 +10,15 @@ export const createPullRequest = async (repo, title, code) => {
         const branchName = `issue-${Date.now()}`;
 
         // Create a new branch
-        await octokit.git.createRef({
+        await octokit.rest.git.createRef({
             owner,
             repo: repoName,
             ref: `refs/heads/${branchName}`,
-            sha: (await octokit.repos.get({ owner, repo: repoName })).data.default_branch
+            sha: (await octokit.rest.repos.get({ owner, repo: repoName })).data.default_branch
         });
 
         // Create a file and commit it
-        await octokit.repos.createOrUpdateFileContents({
+        await octokit.rest.repos.createOrUpdateFileContents({
             owner,
             repo: repoName,
             path: `solution-${Date.now()}.js`,
@@ -28,7 +28,7 @@ export const createPullRequest = async (repo, title, code) => {
         });
 
         // Create a pull request
-        await octokit.pulls.create({
+        await octokit.rest.pulls.create({
             owner,
             repo: repoName,
             title: `Fix: ${title}`,
