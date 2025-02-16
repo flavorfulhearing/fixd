@@ -1,7 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
+const { generateCode } = require('./code-generator');
 const app = express();
-
 app.use(bodyParser.json());
 
 app.post('/webhook', async (req, res) => {
@@ -15,7 +16,7 @@ app.post('/webhook', async (req, res) => {
             
             console.log(`New issue detected: ${issueTitle}`);
 
-            // TODO: Generate code solution using OpenAI
+            const generatedCode = await generateCode(issueTitle, issueBody);
 
             res.status(200).json({ 
                 message: "Pull request created!",
