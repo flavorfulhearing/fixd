@@ -16,7 +16,7 @@ const generateCode = createGenerateCode(openai);
 
 app.post('/webhook', async (req, res) => {
     try {
-        const payload = req.body.payload;
+        const payload = req.body;
         
         if (payload.action === 'opened' && payload.issue) {
             const issueTitle = payload.issue.title;
