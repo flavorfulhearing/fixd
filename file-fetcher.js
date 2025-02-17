@@ -8,7 +8,7 @@ async function getRepositoryFiles(owner, repo) {
 
     for (const file of response.data) {
         // TODO(samdealy): Figure out a better way to filter files. I.e. provide the minium number of relevant files to fetch.
-        // Ideally don't use gpt here because it's expensive.
+        // Potentially use embeddings to find the most relevant files.
         if (file.type === "file") {  
             const fileContent = await octokit.repos.getContent({
                 owner,
