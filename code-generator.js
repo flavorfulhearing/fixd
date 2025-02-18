@@ -1,29 +1,71 @@
 export const createGenerateCode = (openai) => {
     return async (issueTitle, issueBody, repoFiles) => {
         try {
-            const context = repoFiles.map(f => `### ${f.filename}\n${f.content.slice(0, 500)}`).join("\n\n"); // Limit file size
+            const context = repoFiles.map(f => `### ${f.filename}\n${f.content.slice(0, 500)}`).join("\n\n");
 
             const prompt = `
-                You are an AI assistant helping to fix issues in a GitHub repository.
-                Here are some relevant files:
+                You are an AI software engineer tasked with creating code changes for a GitHub issue for the given repository.
+                
+                Repository Context:
                 ${context}
         
-                The issue reported is:
+                GitHub Issue:
                 Title: ${issueTitle}
                 Description: ${issueBody}
         
-                Suggest a code fix based on the provided files.
+                Please provide your code changes in the following format:
+                [file:path/to/file1.js]
+                \`\`\`javascript
+                Your code here
+                \`\`\`
+                ---
+                [file:path/to/file2.js]
+                \`\`\`javascript
+                Your code here
+                \`\`\`
+                ---
             `;
+
             const response = await openai.chat.completions.create({
                 model: "gpt-4",
-                messages: [{ role: "system", content: prompt }],
-                max_tokens: 500
+                messages: [
+                    { 
+                        role: "system", 
+                        content: "You are a skilled software developer. Provide concise, practical code solutions."
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 1000
             });
         
-            return response.choices[0].message.content.trim();
+            return parseGPTResponse(response.choices[0].message.content.trim());
         } catch (error) {
             console.error('Error generating code:', error);
             throw error;
         }
     };
 };
+
+function parseGPTResponse(response) {
+    const files = [];
+    const sections = response.split('---').filter(Boolean);
+    
+    for (const section of sections) {
+        const fileMatch = section.match(/\[file:(.+?)\]/);
+        if (fileMatch) {
+            const path = fileMatch[1];
+            const codeMatch = section.match(/```[\w]*\n([\s\S]*?)```/);
+            if (codeMatch) {
+                files.push({
+                    path: path,
+                    content: codeMatch[1].trim()
+                });
+            }
+        }
+    }
+    return files;
+}

@@ -14,9 +14,9 @@ async function getDefaultBranchCommitSha(owner, repoName) {
     return defaultBranchRef.data.object.sha;
 }
 
-export const createPullRequest = async (repo, title, code) => {
+export const createPullRequest = async (owner, repoName, title, files) => {
     try {
-        const [owner, repoName] = repo.split('/');
+
         const branchName = `issue-${Date.now()}`;
 
         const commitSha = await getDefaultBranchCommitSha(owner, repoName);
@@ -29,16 +29,17 @@ export const createPullRequest = async (repo, title, code) => {
             sha: commitSha  
         });
 
-        // Create a file and commit it
-        await octokit.rest.repos.createOrUpdateFileContents({
-            owner,
-            repo: repoName,
-            path: `solution-${Date.now()}.js`,
-            message: `Auto-generated solution for: ${title}`,
-            content: Buffer.from(code).toString('base64'),
-            branch: branchName
-        });
-
+        // Create/update each file
+        for (const file of files) {
+            await octokit.rest.repos.createOrUpdateFileContents({
+                owner,
+                repo: repoName,
+                path: file.path,
+                message: `Auto-generated changes for: ${title}`,
+                content: Buffer.from(file.content).toString('base64'),
+                branch: branchName
+            });
+        }
         // Create a pull request
         await octokit.rest.pulls.create({
             owner,

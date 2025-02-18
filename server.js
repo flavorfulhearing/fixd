@@ -4,14 +4,15 @@ import bodyParser from 'body-parser';
 import { OpenAI } from 'openai';
 import { createGenerateCode } from './code-generator.js';
 import { createPullRequest } from './pull-requester.js';
+import { getRepositoryFiles } from './file-fetcher.js';
+
 const app = express();
+
 app.use(bodyParser.json());
 
-// Initialize OpenAI once
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
-// Create the generateCode function with openai instance
 const generateCode = createGenerateCode(openai);
 
 app.post('/webhook', async (req, res) => {
@@ -21,13 +22,13 @@ app.post('/webhook', async (req, res) => {
         if (payload.action === 'opened' && payload.issue) {
             const issueTitle = payload.issue.title;
             const issueBody = payload.issue.body;
-            const repo = payload.repository.full_name;
+            const repoName = payload.repository.name;
+            const repoFullName = payload.repository.full_name;
+            const owner = payload.repository.owner.login;
             
-            console.log(`New issue detected: ${issueTitle}`);
-
-            // TODO: Use the generateCode function to actually generate the code
-            const generatedCode = "hello world";
-            const pullRequest = await createPullRequest(repo, issueTitle, generatedCode);
+            const repoFiles = await getRepositoryFiles(owner, repoName);
+            const generatedCode = await generateCode(issueTitle, issueBody, repoFiles);
+            const pullRequest = await createPullRequest(owner, repoName, issueTitle, generatedCode);
 
             res.status(200).json({ 
                 message: "Pull request created!",
