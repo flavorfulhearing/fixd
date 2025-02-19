@@ -31,6 +31,8 @@ Instructions:
    - Type safety and interfaces
    - Import/export statements (use .js extension for ESM)
    - Existing code patterns
+4. Output the code changes in the following format:
+{formatInstructions}
 `);
 
 // 3. Create the OpenAI model instance
@@ -43,7 +45,7 @@ const model = new ChatOpenAI({
 const chain = codeAgentPrompt.pipe(model).pipe(parser);
 
 // 5. Main function to generate code changes
-export async function generateCode(issue: GitHubIssue, files: File[]) {
+export async function generateCode(issue: GitHubIssue, files: File[]): Promise<File[]> {
     try {
         const excludePaths = [
             '.env',
@@ -54,20 +56,22 @@ export async function generateCode(issue: GitHubIssue, files: File[]) {
             '.git/',
             'coverage/'
         ];
-        const codeRepository = files
+        const codeContext = files
             .filter(f => f.filepath && !excludePaths.some(path => f.filepath.startsWith(path)))
             .map(f => `### ${f.filepath}\n${f.content}`)
             .join("\n\n");
 
+        console.log("Code context:",codeContext);
+
+        console.log("Format instructions:",parser.getFormatInstructions());
         // Invoke the chain
         const result = await chain.invoke({
-            codeRepository,
+            codeContext, 
             issueTitle: issue.title,
             issueBody: issue.body,
             formatInstructions: parser.getFormatInstructions(),
         });
 
-        // Convert to unified File type
         const changedFiles: File[] = result.changes.map((changedFile: { filepath: string; content: string; }) => ({
             filepath: changedFile.filepath,
             content: changedFile.content,
@@ -89,9 +93,15 @@ export function createGenerateCode() {
     };
 } 
 
-function validateChanges(result: any) {
-    if (!result.filePath || !result.content) {
-        throw new Error("Invalid code generation result: missing required fields");
+function validateChanges(result: File[]) {
+    if (!Array.isArray(result)) {
+        throw new Error("Invalid code generation result: expected array of files");
+    }
+
+    for (const file of result) {
+        if (!file.filepath || !file.content) {
+            throw new Error(`Invalid file object: missing required fields in ${JSON.stringify(file)}`);
+        }
     }
 
     return result;
