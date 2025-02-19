@@ -1,4 +1,4 @@
-export interface RepoFile {
+export interface File {
     filepath: string;
     content: string;
     sha?: string;

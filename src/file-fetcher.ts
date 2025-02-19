@@ -1,10 +1,10 @@
 import { Octokit } from 'octokit';
-import { RepoFile } from './types.js';
+import { File } from './types.js';
 
 export async function getRepositoryFiles(
     owner: string, 
     repo: string
-): Promise<RepoFile[]> {
+): Promise<File[]> {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
     const response = await octokit.rest.repos.getContent({ 
         owner, 
@@ -13,7 +13,7 @@ export async function getRepositoryFiles(
     });
 
     // Add type assertion to ensure response.data is treated as an array
-    const files: RepoFile[] = [];
+    const files: File[] = [];
     for (const file of Array.isArray(response.data) ? response.data : []) {
         // TODO(samdealy): Figure out a better way to filter files. I.e. provide the minium number of relevant files to fetch.
         // Potentially use embeddings to find the most relevant files.

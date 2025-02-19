@@ -1,10 +1,5 @@
 import { Octokit } from 'octokit';
-
-interface FileChange {
-    filePath: string;
-    content: string;
-    sha?: string;
-}
+import { File } from './types.js';
 
 const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN
@@ -24,7 +19,7 @@ export const createPullRequest = async (
     owner: string, 
     repoName: string, 
     issueTitle: string, 
-    files: FileChange[]
+    files: File[]
 ): Promise<void> => {
     try {
         const branchName = `issue-${Date.now()}`;
@@ -39,7 +34,7 @@ export const createPullRequest = async (
             await octokit.rest.repos.createOrUpdateFileContents({
                 owner,
                 repo: repoName,
-                path: file.filePath,
+                path: file.filepath,
                 message: `Auto-generated changes for: ${issueTitle}`,
                 content: Buffer.from(file.content).toString('base64'),
                 branch: branchName,

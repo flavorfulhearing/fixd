@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { OpenAI } from 'openai';
 import { createGenerateCode } from './issue-to-code.js';
 import { createPullRequest } from './pull-request-submitter.js';
 import { getRepositoryFiles } from './file-fetcher.js';
@@ -25,10 +24,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
-const generateCode = createGenerateCode(openai);
+const generateCode = createGenerateCode();
 
 app.post('/webhook', async (req: Request, res: Response) => {
     try {
