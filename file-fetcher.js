@@ -1,6 +1,13 @@
 import { Octokit } from 'octokit';
+import { createAppAuth } from "@octokit/auth-app";
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+const auth = createAppAuth({
+  appId: process.env.GITHUB_APP_ID,
+  privateKey: process.env.GITHUB_APP_PRIVATE_KEY,
+  installationId: process.env.GITHUB_APP_INSTALLATION_ID,
+});
+
+const octokit = new Octokit({ auth });
 
 export async function getRepositoryFiles(owner, repo) {
     const files = [];
@@ -8,17 +15,4 @@ export async function getRepositoryFiles(owner, repo) {
 
     for (const file of response.data) {
         // TODO(samdealy): Figure out a better way to filter files. I.e. provide the minium number of relevant files to fetch.
-        // Potentially use embeddings to find the most relevant files.
-        if (file.type === "file") {  
-            const fileContent = await octokit.rest.repos.getContent({
-                owner,
-                repo,
-                path: file.path
-            });
-            const content = Buffer.from(fileContent.data.content, "base64").toString("utf-8");
-            files.push({ filePath: file.path, content, sha: fileContent.data.sha });
-        }
-    }
-
-    return files;
-}
+        // Potentially use embeddings to find the most relevant fil
