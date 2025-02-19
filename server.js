@@ -19,16 +19,15 @@ app.post('/webhook', async (req, res) => {
     try {
         const payload = req.body;
         
-        if (payload.action === 'opened' && payload.issue) {
+        if (shouldProcessPayload(payload)) {
             const issueTitle = payload.issue.title;
             const issueBody = payload.issue.body;
             const repoName = payload.repository.name;
-            const repoFullName = payload.repository.full_name;
             const owner = payload.repository.owner.login;
             
             const repoFiles = await getRepositoryFiles(owner, repoName);
             const generatedCode = await generateCode(issueTitle, issueBody, repoFiles);
-            const pullRequest = await createPullRequest(owner, repoName, issueTitle, generatedCode);
+            await createPullRequest(owner, repoName, issueTitle, generatedCode);
 
             res.status(200).json({ 
                 message: "Pull request created!",
@@ -45,5 +44,16 @@ app.post('/webhook', async (req, res) => {
         });
     }
 });
+
+function shouldProcessPayload(payload) {
+    if (payload.action !== 'opened') {
+        return false;
+    }
+    if (!payload.issue) {
+        return false;
+    }
+
+    return payload.issue.labels.some(label => label.name === 'auto-fix');
+}
 
 app.listen(3000, () => console.log('Listening on port 3000'));

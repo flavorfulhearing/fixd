@@ -31,7 +31,7 @@ export const createGenerateCode = (openai) => {
                 messages: [
                     { 
                         role: "system", 
-                        content: "You are a skilled software developer. Provide concise, practical code solutions."
+                        content: "You are an AI software engineer tasked with creating a pull request that fixes a simple GitHub issue."
                     },
                     {
                         role: "user",
