@@ -1,8 +1,13 @@
 import { Octokit } from 'octokit';
+import { createAppAuth } from "@octokit/auth-app";
 
-const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN
+const auth = createAppAuth({
+  appId: process.env.GITHUB_APP_ID,
+  privateKey: process.env.GITHUB_APP_PRIVATE_KEY,
+  installationId: process.env.GITHUB_APP_INSTALLATION_ID,
 });
+
+const octokit = new Octokit({ auth });
 
 async function getDefaultBranchCommitSha(owner, repoName) {
     const defaultBranch = (await octokit.rest.repos.get({ owner, repo: repoName })).data.default_branch;
@@ -14,38 +19,4 @@ async function getDefaultBranchCommitSha(owner, repoName) {
     return defaultBranchRef.data.object.sha;
 }
 
-export const createPullRequest = async (owner, repoName, issueTitle, files) => {
-    try {
-        const branchName = `issue-${Date.now()}`;
-        const commitSha = await getDefaultBranchCommitSha(owner, repoName);
-        await octokit.rest.git.createRef({
-            owner,
-            repo: repoName,
-            ref: `refs/heads/${branchName}`,
-            sha: commitSha  
-        });
-        for (const file of files) {
-            await octokit.rest.repos.createOrUpdateFileContents({
-                owner,
-                repo: repoName,
-                path: file.filePath,
-                message: `Auto-generated changes for: ${issueTitle}`,
-                content: Buffer.from(file.content).toString('base64'),
-                branch: branchName,
-                sha: file.sha
-            });
-        }
-        await octokit.rest.pulls.create({
-            owner,
-            repo: repoName,
-            title: `Fix: ${issueTitle}`,
-            head: branchName,
-            base: "main",
-            body: `This PR automatically addresses the issue: ${issueTitle}.`,
-        });
-
-        console.log("Pull request created successfully!");
-    } catch (error) {
-        console.error('Error creating PR:', error);
-    }
-};
+export const createPullRequest = as
