@@ -42,7 +42,7 @@ export const createGenerateCode = (openai) => {
                 max_tokens: 1000
             });
         
-            return parseGPTResponse(response.choices[0].message.content.trim());
+            return parseGPTResponse(response.choices[0].message.content.trim(), repoFiles);
         } catch (error) {
             console.error('Error generating code:', error);
             throw error;
@@ -50,19 +50,22 @@ export const createGenerateCode = (openai) => {
     };
 };
 
-function parseGPTResponse(response) {
+function parseGPTResponse(response, repoFiles) {
     const files = [];
     const sections = response.split('---').filter(Boolean);
     
     for (const section of sections) {
         const fileMatch = section.match(/\[file:(.+?)\]/);
         if (fileMatch) {
-            const path = fileMatch[1];
+            const filePathMatch = fileMatch[1];
             const codeMatch = section.match(/```[\w]*\n([\s\S]*?)```/);
             if (codeMatch) {
+                // Find matching repo file to get its SHA
+                const repoFile = repoFiles.find(file => file.filePath === filePathMatch);
                 files.push({
-                    path: path,
-                    content: codeMatch[1].trim()
+                    filePath: repoFile.filePath,
+                    content: codeMatch[1].trim(),
+                    sha: repoFile?.sha  // Will be undefined if file is new
                 });
             }
         }

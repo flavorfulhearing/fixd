@@ -14,7 +14,7 @@ async function getDefaultBranchCommitSha(owner, repoName) {
     return defaultBranchRef.data.object.sha;
 }
 
-export const createPullRequest = async (owner, repoName, title, files) => {
+export const createPullRequest = async (owner, repoName, issueTitle, files) => {
     try {
         const branchName = `issue-${Date.now()}`;
         const commitSha = await getDefaultBranchCommitSha(owner, repoName);
@@ -28,24 +28,24 @@ export const createPullRequest = async (owner, repoName, title, files) => {
             await octokit.rest.repos.createOrUpdateFileContents({
                 owner,
                 repo: repoName,
-                path: file.path,
-                message: `Auto-generated changes for: ${title}`,
+                path: file.filePath,
+                message: `Auto-generated changes for: ${issueTitle}`,
                 content: Buffer.from(file.content).toString('base64'),
-                branch: branchName
+                branch: branchName,
+                sha: file.sha
             });
         }
         await octokit.rest.pulls.create({
             owner,
             repo: repoName,
-            title: `Fix: ${title}`,
+            title: `Fix: ${issueTitle}`,
             head: branchName,
             base: "main",
-            body: `This PR automatically addresses the issue: ${title}.`,
+            body: `This PR automatically addresses the issue: ${issueTitle}.`,
         });
 
         console.log("Pull request created successfully!");
     } catch (error) {
         console.error('Error creating PR:', error);
-        throw error;
     }
 };

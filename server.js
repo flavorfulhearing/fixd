@@ -2,8 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { OpenAI } from 'openai';
-import { createGenerateCode } from './code-generator.js';
-import { createPullRequest } from './pull-requester.js';
+import { createGenerateCode } from './issue-to-code.js';
+import { createPullRequest } from './pull-request-submitter.js';
 import { getRepositoryFiles } from './file-fetcher.js';
 
 const app = express();
@@ -26,12 +26,11 @@ app.post('/webhook', async (req, res) => {
             const owner = payload.repository.owner.login;
             
             const repoFiles = await getRepositoryFiles(owner, repoName);
-            const generatedCode = await generateCode(issueTitle, issueBody, repoFiles);
-            await createPullRequest(owner, repoName, issueTitle, generatedCode);
+            const generatedFiles = await generateCode(issueTitle, issueBody, repoFiles);
+            await createPullRequest(owner, repoName, issueTitle, generatedFiles);
 
             res.status(200).json({ 
                 message: "Pull request created!",
-                code: generatedCode 
             });
         } else {
             res.status(200).json({ message: "No action taken." });
