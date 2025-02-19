@@ -8,5 +8,17 @@
     "octokit": "^4.1.2",
     "openai": "^4.85.1",
     "smee-client": "^2.0.4"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/express": "^5.0.0",
+    "@types/node": "^20.17.19",
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "dev": "concurrently \"tsx watch src/server.ts\" \"tsc --watch --noEmit\"",
+    "build": "tsc",
+    "start": "node dist/server.js"
   }
 }
