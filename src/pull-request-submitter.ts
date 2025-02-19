@@ -1,10 +1,16 @@
 import { Octokit } from 'octokit';
 
+interface FileChange {
+    filePath: string;
+    content: string;
+    sha?: string;
+}
+
 const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN
 });
 
-async function getDefaultBranchCommitSha(owner, repoName) {
+async function getDefaultBranchCommitSha(owner: string, repoName: string): Promise<string> {
     const defaultBranch = (await octokit.rest.repos.get({ owner, repo: repoName })).data.default_branch;
     const defaultBranchRef = await octokit.rest.git.getRef({
         owner,
@@ -14,7 +20,12 @@ async function getDefaultBranchCommitSha(owner, repoName) {
     return defaultBranchRef.data.object.sha;
 }
 
-export const createPullRequest = async (owner, repoName, issueTitle, files) => {
+export const createPullRequest = async (
+    owner: string, 
+    repoName: string, 
+    issueTitle: string, 
+    files: FileChange[]
+): Promise<void> => {
     try {
         const branchName = `issue-${Date.now()}`;
         const commitSha = await getDefaultBranchCommitSha(owner, repoName);
@@ -48,4 +59,4 @@ export const createPullRequest = async (owner, repoName, issueTitle, files) => {
     } catch (error) {
         console.error('Error creating PR:', error);
     }
-};
+}; 

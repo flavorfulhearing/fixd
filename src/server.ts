@@ -1,10 +1,25 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import { OpenAI } from 'openai';
-import { createGenerateCode } from './issue-to-code.js';
-import { createPullRequest } from './pull-request-submitter.js';
-import { getRepositoryFiles } from './file-fetcher.js';
+import { createGenerateCode } from './issue-to-code';
+import { createPullRequest } from './pull-request-submitter';
+import { getRepositoryFiles } from './file-fetcher';
+
+interface WebhookPayload {
+    action: string;
+    issue?: {
+        title: string;
+        body: string;
+        labels: Array<{ name: string }>;
+    };
+    repository: {
+        name: string;
+        owner: {
+            login: string;
+        };
+    };
+}
 
 const app = express();
 
@@ -15,18 +30,18 @@ const openai = new OpenAI({
 });
 const generateCode = createGenerateCode(openai);
 
-app.post('/webhook', async (req, res) => {
+app.post('/webhook', async (req: Request, res: Response) => {
     try {
-        const payload = req.body;
+        const payload = req.body as WebhookPayload;
         
         if (shouldProcessPayload(payload)) {
-            const issueTitle = payload.issue.title;
-            const issueBody = payload.issue.body;
+            const issueTitle = payload.issue!.title;
+            const issueBody = payload.issue!.body;
             const repoName = payload.repository.name;
             const owner = payload.repository.owner.login;
             
             const repoFiles = await getRepositoryFiles(owner, repoName);
-            const generatedFiles = await generateCode(issueTitle, issueBody, repoFiles);
+            const generatedFiles = await generateCode({ title: issueTitle, body: issueBody }, repoFiles);
             await createPullRequest(owner, repoName, issueTitle, generatedFiles);
 
             res.status(200).json({ 
@@ -39,12 +54,12 @@ app.post('/webhook', async (req, res) => {
         console.error('Error processing webhook:', error);
         res.status(500).json({ 
             error: 'Internal server error',
-            message: error.message 
+            message: error instanceof Error ? error.message : 'Unknown error'
         });
     }
 });
 
-function shouldProcessPayload(payload) {
+function shouldProcessPayload(payload: WebhookPayload): boolean {
     if (payload.action !== 'opened') {
         return false;
     }
@@ -55,4 +70,4 @@ function shouldProcessPayload(payload) {
     return payload.issue.labels.some(label => label.name === 'auto-fix');
 }
 
-app.listen(3000, () => console.log('Listening on port 3000'));
+app.listen(3000, () => console.log('Listening on port 3000')); 
