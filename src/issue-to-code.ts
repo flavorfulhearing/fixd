@@ -27,12 +27,6 @@ Description: {issueBody}
 Instructions:
 1. Analyze the issue and existing TypeScript code
 2. Plan necessary changes
-3. Consider:
-   - Type safety and interfaces
-   - Import/export statements (use .js extension for ESM)
-   - Existing code patterns
-4. Output the code changes in the following format:
-5. Always return changes even for small tasks like comment removal
 
 {formatInstructions}
 `);
@@ -50,19 +44,7 @@ const chain = codeAgentPrompt.pipe(model).pipe(parser);
 // 5. Main function to generate code changes
 export async function generateCode(issue: GitHubIssue, files: File[]): Promise<File[]> {
     try {
-        console.log("files: ", files);
-        const excludePaths = [
-            '.env',
-            'node_modules/',
-            'package-lock.json',
-            'dist/',
-            'build/',
-            '.git/',
-            'coverage/',
-            'tsconfig.json',
-        ];
         const codeContext = files
-            .filter(f => f.filepath && !excludePaths.some(path => f.filepath.startsWith(path)))
             .map(f => `### ${f.filepath}\n${f.content}`)
             .join("\n\n");
         const result = await chain.invoke({
