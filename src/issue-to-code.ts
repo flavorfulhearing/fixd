@@ -15,7 +15,7 @@ const OutputSchema = z.object({
 const parser = StructuredOutputParser.fromZodSchema(OutputSchema);
 
 const codeAgentPrompt = ChatPromptTemplate.fromTemplate(`
-You are an expert TypeScript Code Agent. Your task is to analyze and modify TypeScript code based on GitHub issues.
+You are an expert TypeScript Code Agent. Your task is to analyze and modify TypeScript code based on the GitHub issue.
 
 Repository Context:
 {codeContext}
@@ -32,13 +32,16 @@ Instructions:
    - Import/export statements (use .js extension for ESM)
    - Existing code patterns
 4. Output the code changes in the following format:
+5. Always return changes even for small tasks like comment removal
+
 {formatInstructions}
 `);
 
 // 3. Create the OpenAI model instance
 const model = new ChatOpenAI({
-    modelName: "gpt-4",
-    temperature: 0
+    modelName: "gpt-4o-mini",
+    temperature: 0,
+    verbose: true,
 });
 
 // 4. Create the chain
@@ -47,6 +50,7 @@ const chain = codeAgentPrompt.pipe(model).pipe(parser);
 // 5. Main function to generate code changes
 export async function generateCode(issue: GitHubIssue, files: File[]): Promise<File[]> {
     try {
+        console.log("files: ", files);
         const excludePaths = [
             '.env',
             'node_modules/',
@@ -54,17 +58,13 @@ export async function generateCode(issue: GitHubIssue, files: File[]): Promise<F
             'dist/',
             'build/',
             '.git/',
-            'coverage/'
+            'coverage/',
+            'tsconfig.json',
         ];
         const codeContext = files
             .filter(f => f.filepath && !excludePaths.some(path => f.filepath.startsWith(path)))
             .map(f => `### ${f.filepath}\n${f.content}`)
             .join("\n\n");
-
-        console.log("Code context:",codeContext);
-
-        console.log("Format instructions:",parser.getFormatInstructions());
-        // Invoke the chain
         const result = await chain.invoke({
             codeContext, 
             issueTitle: issue.title,
@@ -94,7 +94,7 @@ export function createGenerateCode() {
 } 
 
 function validateChanges(result: File[]) {
-    if (!Array.isArray(result)) {
+    if (result.length === 0) {
         throw new Error("Invalid code generation result: expected array of files");
     }
 

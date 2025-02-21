@@ -17,6 +17,20 @@ export async function getRepositoryFiles(
     for (const file of Array.isArray(response.data) ? response.data : []) {
         // TODO(samdealy): Figure out a better way to filter files. I.e. provide the minium number of relevant files to fetch.
         // Potentially use embeddings to find the most relevant files.
+        console.log("file: ", file);
+        const excludePaths = [
+            '.env',
+            'node_modules/',
+            'package-lock.json',
+            'dist/',
+            'build/',
+            '.git/',
+            'coverage/',
+            'tsconfig.json',
+        ];
+        if (excludePaths.some(path => file.path.startsWith(path))) {
+            continue;
+        }
         if (file.type === "file") {  
             const fileContent = await octokit.rest.repos.getContent({
                 owner,
