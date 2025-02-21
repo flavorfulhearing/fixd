@@ -20,7 +20,7 @@
     "typescript": "^5.7.3"
   },
   "scripts": {
-    "dev": "concurrently \"tsx watch src/server.ts\" \"tsc --watch --noEmit\" \"smee -u https://smee.io/0a9oM0wDxcMl1QmA -t http://localhost:3000/webhook\"",
+    "dev": "concurrently \"tsx watch src/server.ts\" \"wait-on tcp:3000 && smee -u https://smee.io/gS8YvXqDQpz1436s -t http://localhost:3000/webhook\"",
     "build": "tsc",
     "start": "node dist/server.js"
   }

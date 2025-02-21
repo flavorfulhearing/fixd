@@ -1,58 +1,39 @@
 import { GitHubIssue, File } from './types.js';
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { z } from "zod";
 
 const FileChangeSchema = z.object({
     filepath: z.string().describe("The path to the file that needs to be changed"),
     content: z.string().describe("The full contents of the file that needs to be changed"),
 });
-
 const OutputSchema = z.object({
     changes: z.array(FileChangeSchema).describe("An array of file changes that need to be made to fix the issue"),
 });
-const parser = StructuredOutputParser.fromZodSchema(OutputSchema);
-
-const codeAgentPrompt = ChatPromptTemplate.fromTemplate(`
-You are an expert TypeScript Code Agent. Your task is to analyze and modify TypeScript code based on the GitHub issue.
-
-Repository Context:
-{codeContext}
-
-GitHub Issue:
-Title: {issueTitle}
-Description: {issueBody}
-
-Instructions:
-1. Analyze the issue and existing TypeScript code
-2. Plan necessary changes
-
-{formatInstructions}
-`);
-
-// 3. Create the OpenAI model instance
-const model = new ChatOpenAI({
+const systemTemplate = "You are an expert TypeScript Code Agent. Your task is to analyze and modify TypeScript code based on the GitHub issue presented to you.";
+const humanTemplate = "Here is my codebase: {codeContext}\n\nHere is the GitHub issue: {issueTitle}\n {issueBody}";
+const promptTemplate = ChatPromptTemplate.fromMessages([
+    ["system", systemTemplate],
+    ["human", humanTemplate],
+]);
+const llm = new ChatOpenAI({
     modelName: "gpt-4o-mini",
     temperature: 0,
-    verbose: true,
 });
+const structured_llm = llm.withStructuredOutput(OutputSchema);
 
-// 4. Create the chain
-const chain = codeAgentPrompt.pipe(model).pipe(parser);
-
-// 5. Main function to generate code changes
 export async function generateCode(issue: GitHubIssue, files: File[]): Promise<File[]> {
     try {
         const codeContext = files
             .map(f => `### ${f.filepath}\n${f.content}`)
             .join("\n\n");
-        const result = await chain.invoke({
-            codeContext, 
+        const prompt = await promptTemplate.invoke({
+            codeContext: codeContext,
             issueTitle: issue.title,
             issueBody: issue.body,
-            formatInstructions: parser.getFormatInstructions(),
         });
+        const result = await structured_llm.invoke(prompt);
+        console.log(result);
 
         const changedFiles: File[] = result.changes.map((changedFile: { filepath: string; content: string; }) => ({
             filepath: changedFile.filepath,
