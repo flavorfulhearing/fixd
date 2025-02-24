@@ -1,13 +1,26 @@
 FROM python:3.9-slim
 
-  WORKDIR /app
+WORKDIR /app
 
-  COPY requirements.txt .
+# Install Poetry
+RUN pip install poetry
 
-  RUN pip install --no-cache-dir -r requirements.txt
+# Copy only requirements to cache them in docker layer
+COPY pyproject.toml poetry.lock* ./
 
-  COPY . .
+# Configure poetry to not use a virtual environment in Docker
+RUN poetry config virtualenvs.create false
 
-  EXPOSE 50051
+# Install dependencies only (without the project itself)
+RUN poetry install --no-interaction --no-ansi --without dev --no-root
 
-  CMD ["python", "-m", "code_agent"]
+# Copy the source code
+COPY . .
+
+# Now install the project
+RUN poetry install --no-interaction --no-ansi --without dev
+
+EXPOSE 50051
+
+# Use a more explicit path to ensure the module is found
+CMD ["python", "-m", "src.code_agent"]

@@ -60,3 +60,6 @@ services/code-agent/dist/
 services/code-agent/venv/
 services/code-agent/.venv/
 services/code-agent/ENV/
+.venv/
+.pytest_cache/
+__pycache__/
