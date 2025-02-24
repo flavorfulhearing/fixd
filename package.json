@@ -17,12 +17,13 @@
     "@types/express": "^5.0.0",
     "@types/node": "^20.17.19",
     "concurrently": "^9.1.2",
-    "typescript": "^5.7.3",
-    "wait-on": "^8.0.2"
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "dev": "concurrently \"tsx watch src/server.ts\" \"wait-on tcp:3000 && smee -u https://smee.io/gS8YvXqDQpz1436s -t http://localhost:3000/webhook\"",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "format": "prettier --write \"src/**/*.{js,ts}\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts}\""
   }
 }

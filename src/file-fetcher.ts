@@ -17,6 +17,9 @@ const EXCLUDE_PATHS = [
     '.idea/',
     '.DS_Store',
     '.env.local',
+    '.prettierrc',
+    '.prettierignore',
+    '.eslintrc.js',
 ];
 
 // Initialize Octokit once at module level
