@@ -1,9 +1,8 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { createGenerateCode } from './issue-to-code.js';
-import { createPullRequest } from './pull-request-submitter.js';
-import { getRepositoryFiles } from './file-fetcher.js';
+import { credentials } from '@grpc/grpc-js';
+import { GrpcCodeAgentClient } from './generated/code_agent.js';
 
 interface WebhookPayload {
   action: string;
@@ -24,8 +23,6 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const generateCode = createGenerateCode();
-
 app.post('/webhook', async (req: Request, res: Response) => {
   try {
     console.log('Received webhook');
@@ -36,13 +33,16 @@ app.post('/webhook', async (req: Request, res: Response) => {
       const issueBody = payload.issue!.body;
       const repoName = payload.repository.name;
       const owner = payload.repository.owner.login;
+      const fullRepoName = `${owner}/${repoName}`;
 
-      const repoFiles = await getRepositoryFiles(owner, repoName);
-      const generatedFiles = await generateCode(
-        { title: issueTitle, body: issueBody },
-        repoFiles
-      );
-      await createPullRequest(owner, repoName, issueTitle, generatedFiles);
+      const codeAgentClient = new GrpcCodeAgentClient('localhost:50051', credentials.createInsecure());
+      const result = await codeAgentClient.fixIssue({
+        fullRepoName: fullRepoName,
+        issue: {
+          title: issueTitle,
+          body: issueBody,
+        }
+      });
 
       res.status(200).json({
         message: 'Pull request created!',
