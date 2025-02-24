@@ -9,6 +9,14 @@ yarn-error.log
 .env.local
 .env.*.local
 
+# Environment files
+services/web/.env
+services/web/.env.local
+services/web/.env.*.local
+services/code-editor/.env
+services/code-editor/.env.local
+services/code-editor/.env.*.local
+
 # IDE specific files
 .idea/
 .vscode/
@@ -26,3 +34,23 @@ Thumbs.db
 
 # Test files
 test_curl.sh
+
+# JavaScript/TypeScript (web service)
+services/web/node_modules/
+services/web/dist/
+services/web/coverage/
+services/web/*.log
+services/web/npm-debug.log*
+
+# Python (code-editor service)
+services/code-editor/__pycache__/
+services/code-editor/src/__pycache__/
+services/code-editor/*.py[cod]
+services/code-editor/*$py.class
+services/code-editor/*.so
+services/code-editor/.Python
+services/code-editor/build/
+services/code-editor/dist/
+services/code-editor/venv/
+services/code-editor/.venv/
+services/code-editor/ENV/
