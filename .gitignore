@@ -1,8 +1,5 @@
 # Dependencies
 node_modules/
-npm-debug.log
-yarn-debug.log
-yarn-error.log
 
 # Environment variables
 .env
@@ -23,17 +20,6 @@ services/code-agent/.env.*.local
 *.swp
 *.swo
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db 
-
-# Test files
-test_curl.sh
 
 # JavaScript/TypeScript (web service)
 services/web/node_modules/
@@ -44,22 +30,18 @@ services/web/npm-debug.log*
 services/web/**/*.js
 services/web/**/*.js.map
 services/web/src/**/*.js
-services/web/src/**/*.js.map
-services/web/src/issue-to-code/**/*.js
-services/web/src/issue-to-code/**/*.js.map
 
 # Python (code-agent service)
-services/code-agent/__pycache__/
-services/code-agent/src/__pycache__/
-services/code-agent/*.py[cod]
-services/code-agent/*$py.class
-services/code-agent/*.so
-services/code-agent/.Python
-services/code-agent/build/
-services/code-agent/dist/
-services/code-agent/venv/
-services/code-agent/.venv/
-services/code-agent/ENV/
+services/code_agent/src/__pycache__/
+services/code_agent/*.py[cod]
+services/code_agent/*$py.class
+services/code_agent/*.so
+services/code_agent/.Python
+services/code_agent/build/
+services/code_agent/dist/
+services/code_agent/venv/
+services/code_agent/.venv/
+services/code_agent/ENV/
 .venv/
 .pytest_cache/
 __pycache__/
