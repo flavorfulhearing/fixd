@@ -28,6 +28,7 @@ const generateCode = createGenerateCode();
 
 app.post('/webhook', async (req: Request, res: Response) => {
     try {
+        console.log("Received webhook");
         const payload = req.body as WebhookPayload;
         
         if (shouldProcessPayload(payload)) {
@@ -56,7 +57,7 @@ app.post('/webhook', async (req: Request, res: Response) => {
 });
 
 function shouldProcessPayload(payload: WebhookPayload): boolean {
-    if (payload.action !== 'opened') {
+    if (!isActionToProcess(payload.action)) {
         return false;
     }
     if (!payload.issue) {
@@ -64,6 +65,10 @@ function shouldProcessPayload(payload: WebhookPayload): boolean {
     }
 
     return payload.issue.labels.some(label => label.name === 'auto-fix');
+}
+
+function isActionToProcess(action: string): boolean {
+    return action === 'opened' || action === 'edited'
 }
 
 app.listen(3000, () => console.log('Listening on port 3000')); 

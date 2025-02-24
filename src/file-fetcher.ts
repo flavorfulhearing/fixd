@@ -27,7 +27,6 @@ export async function getRepositoryFiles(
     repo: string,
 ): Promise<File[]> {
     const files = await getRepositoryFilesImpl(owner, repo, "");
-    console.log('All files fetched:', files.map(f => f.filepath));
     return files;
 }
 
@@ -58,10 +57,9 @@ async function getRepositoryFilesImpl(
 
                 if ('content' in fileContent.data && fileContent.data.content) {
                     try {
-                        const content = Buffer.from(fileContent.data.content, "base64").toString("utf-8");
                         files.push({ 
                             filepath: item.path, 
-                            content, 
+                            base64Content: fileContent.data.content, 
                             sha: fileContent.data.sha 
                         });
                     } catch (decodeError) {

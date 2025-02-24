@@ -1,6 +1,7 @@
 export interface File {
     filepath: string;
-    content: string;
+    // The file content that's encoded as base64.
+    base64Content: string;
     sha?: string;
 }
 

@@ -17,7 +17,8 @@
     "@types/express": "^5.0.0",
     "@types/node": "^20.17.19",
     "concurrently": "^9.1.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "wait-on": "^8.0.2"
   },
   "scripts": {
     "dev": "concurrently \"tsx watch src/server.ts\" \"wait-on tcp:3000 && smee -u https://smee.io/gS8YvXqDQpz1436s -t http://localhost:3000/webhook\"",

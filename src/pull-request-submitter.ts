@@ -36,7 +36,7 @@ export const createPullRequest = async (
                 repo: repoName,
                 path: file.filepath,
                 message: `Auto-generated changes for: ${issueTitle}`,
-                content: Buffer.from(file.content).toString('base64'),
+                content: file.content,
                 branch: branchName,
                 sha: file.sha
             });
