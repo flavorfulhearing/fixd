@@ -83,7 +83,7 @@ function validateChanges(result: File[]) {
   }
 
   for (const file of result) {
-    if (!file.filepath || !file.content) {
+    if (!file.filepath || !file.base64Content) {
       throw new Error(
         `Invalid file object: missing required fields in ${JSON.stringify(file)}`
       );
