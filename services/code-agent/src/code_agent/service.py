@@ -1,7 +1,7 @@
 from concurrent import futures
 import grpc
-from .generated import code_agent_pb2
-from .generated import code_agent_pb2_grpc
+from . import code_agent_pb2
+from . import code_agent_pb2_grpc
 
 class CodeAgentService(code_agent_pb2_grpc.CodeAgentServicer):
     def FixIssue(self, request, context):
