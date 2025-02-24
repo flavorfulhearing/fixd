@@ -6,33 +6,20 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-import * as grpc from "@grpc/grpc-js";
+import {
+  type CallOptions,
+  ChannelCredentials,
+  Client,
+  type ClientOptions,
+  type ClientUnaryCall,
+  type handleUnaryCall,
+  makeGenericClientConstructor,
+  Metadata,
+  type ServiceError,
+  type UntypedServiceImplementation,
+} from "@grpc/grpc-js";
 
 export const protobufPackage = "code_editor";
-
-// Add gRPC client definition
-export interface CodeAgentClient {
-  fixIssue(request: IssueFixRequest): Promise<IssueFixResponse>;
-}
-
-export class GrpcCodeAgentClient implements CodeAgentClient {
-  private client: any;
-
-  constructor(address: string, credentials: grpc.ChannelCredentials) {
-    // Simple client implementation
-    this.client = {
-      fixIssue: (request: IssueFixRequest) => {
-        return Promise.resolve({
-          pullRequestUrl: `https://github.com/${request.fullRepoName}/pull/123`
-        });
-      }
-    };
-  }
-
-  async fixIssue(request: IssueFixRequest): Promise<IssueFixResponse> {
-    return this.client.fixIssue(request);
-  }
-}
 
 export interface IssueFixRequest {
   fullRepoName: string;
@@ -257,6 +244,50 @@ export const IssueFixResponse: MessageFns<IssueFixResponse> = {
     message.pullRequestUrl = object.pullRequestUrl ?? "";
     return message;
   },
+};
+
+export type CodeAgentService = typeof CodeAgentService;
+export const CodeAgentService = {
+  /** Generate code changes and Submit pull request to fix given issue */
+  fixIssue: {
+    path: "/code_editor.CodeAgent/FixIssue",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: IssueFixRequest) => Buffer.from(IssueFixRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => IssueFixRequest.decode(value),
+    responseSerialize: (value: IssueFixResponse) => Buffer.from(IssueFixResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => IssueFixResponse.decode(value),
+  },
+} as const;
+
+export interface CodeAgentServer extends UntypedServiceImplementation {
+  /** Generate code changes and Submit pull request to fix given issue */
+  fixIssue: handleUnaryCall<IssueFixRequest, IssueFixResponse>;
+}
+
+export interface CodeAgentClient extends Client {
+  /** Generate code changes and Submit pull request to fix given issue */
+  fixIssue(
+    request: IssueFixRequest,
+    callback: (error: ServiceError | null, response: IssueFixResponse) => void,
+  ): ClientUnaryCall;
+  fixIssue(
+    request: IssueFixRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: IssueFixResponse) => void,
+  ): ClientUnaryCall;
+  fixIssue(
+    request: IssueFixRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: IssueFixResponse) => void,
+  ): ClientUnaryCall;
+}
+
+export const CodeAgentClient = makeGenericClientConstructor(CodeAgentService, "code_editor.CodeAgent") as unknown as {
+  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): CodeAgentClient;
+  service: typeof CodeAgentService;
+  serviceName: string;
 };
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

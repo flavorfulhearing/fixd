@@ -1,5 +1,9 @@
 {
   "type": "module",
+  "engines": {
+    "node": ">=20.17.19",
+    "npm": ">=10.5.0"
+  },
   "dependencies": {
     "@langchain/core": "^0.3.40",
     "@langchain/openai": "^0.4.4",
@@ -22,7 +26,8 @@
     "grpc_tools_node_protoc_ts": "^5.3.3",
     "grpc-tools": "^1.13.0",
     "ts-proto": "^2.6.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "wait-on": "^8.0.2"
   },
   "scripts": {
     "dev": "concurrently \"tsx watch src/server.ts\" \"wait-on tcp:3000 && smee -u https://smee.io/gS8YvXqDQpz1436s -t http://localhost:3000/webhook\"",
@@ -30,6 +35,6 @@
     "start": "node dist/server.js",
     "format": "prettier --write \"src/**/*.{js,ts}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts}\"",
-    "generate-proto": "mkdir -p src/generated && protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/generated --ts_proto_opt=esModuleInterop=true,outputServices=grpc,env=node -I../../proto ../../proto/code_agent.proto"
+    "generate-proto": "mkdir -p src/generated && protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/generated --ts_proto_opt=esModuleInterop=true,outputServices=grpc-js,env=node -I../../proto ../../proto/code_agent.proto"
   }
 }
