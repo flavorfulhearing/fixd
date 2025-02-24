@@ -13,9 +13,9 @@ yarn-error.log
 services/web/.env
 services/web/.env.local
 services/web/.env.*.local
-services/code-editor/.env
-services/code-editor/.env.local
-services/code-editor/.env.*.local
+services/code-agent/.env
+services/code-agent/.env.local
+services/code-agent/.env.*.local
 
 # IDE specific files
 .idea/
@@ -41,16 +41,22 @@ services/web/dist/
 services/web/coverage/
 services/web/*.log
 services/web/npm-debug.log*
+services/web/**/*.js
+services/web/**/*.js.map
+services/web/src/**/*.js
+services/web/src/**/*.js.map
+services/web/src/issue-to-code/**/*.js
+services/web/src/issue-to-code/**/*.js.map
 
-# Python (code-editor service)
-services/code-editor/__pycache__/
-services/code-editor/src/__pycache__/
-services/code-editor/*.py[cod]
-services/code-editor/*$py.class
-services/code-editor/*.so
-services/code-editor/.Python
-services/code-editor/build/
-services/code-editor/dist/
-services/code-editor/venv/
-services/code-editor/.venv/
-services/code-editor/ENV/
+# Python (code-agent service)
+services/code-agent/__pycache__/
+services/code-agent/src/__pycache__/
+services/code-agent/*.py[cod]
+services/code-agent/*$py.class
+services/code-agent/*.so
+services/code-agent/.Python
+services/code-agent/build/
+services/code-agent/dist/
+services/code-agent/venv/
+services/code-agent/.venv/
+services/code-agent/ENV/
