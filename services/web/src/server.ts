@@ -1,9 +1,8 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { createGenerateCode } from './issue-to-code.js';
-import { createPullRequest } from './pull-request-submitter.js';
-import { getRepositoryFiles } from './file-fetcher.js';
+import { credentials } from '@grpc/grpc-js';
+import { CodeAgentClient, IssueFixRequest, IssueFixResponse, Issue } from './generated/code_agent.js';
 
 interface WebhookPayload {
   action: string;
@@ -24,25 +23,35 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const generateCode = createGenerateCode();
-
 app.post('/webhook', async (req: Request, res: Response) => {
   try {
     console.log('Received webhook');
     const payload = req.body as WebhookPayload;
 
     if (shouldProcessPayload(payload)) {
+      console.log("Should process payload");
       const issueTitle = payload.issue!.title;
       const issueBody = payload.issue!.body;
       const repoName = payload.repository.name;
       const owner = payload.repository.owner.login;
+      const fullRepoName = `${owner}/${repoName}`;
+      console.log("Before code agent client");
 
-      const repoFiles = await getRepositoryFiles(owner, repoName);
-      const generatedFiles = await generateCode(
-        { title: issueTitle, body: issueBody },
-        repoFiles
-      );
-      await createPullRequest(owner, repoName, issueTitle, generatedFiles);
+      const issue: Issue = {
+        title: issueTitle,
+        body: issueBody,
+      }
+
+      const issueFixRequest: IssueFixRequest = {
+        fullRepoName,
+        issue,
+      }
+
+      const result = await callIssueFix(issueFixRequest);
+
+      
+      console.log('Result from code agent client: ', result);
+      console.log('After code agent client');
 
       res.status(200).json({
         message: 'Pull request created!',
@@ -58,6 +67,19 @@ app.post('/webhook', async (req: Request, res: Response) => {
     });
   }
 });
+
+function callIssueFix(request: IssueFixRequest): Promise<IssueFixResponse> {
+  const codeAgentClient = new CodeAgentClient('localhost:50051', credentials.createInsecure());
+  return new Promise((resolve, reject) => {
+    codeAgentClient.fixIssue(request, (error, response) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(response);
+      }
+    });
+  });
+}
 
 function shouldProcessPayload(payload: WebhookPayload): boolean {
   if (!isActionToProcess(payload.action)) {
