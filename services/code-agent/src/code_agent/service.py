@@ -4,6 +4,7 @@ import logging
 import sys
 from . import code_agent_pb2
 from . import code_agent_pb2_grpc
+from . import code_agent_impl
 
 # Configure logging
 logging.basicConfig(
@@ -31,6 +32,7 @@ class CodeAgentService(code_agent_pb2_grpc.CodeAgentServicer):
             logger.info(f"Issue body: {issue_body}")
 
             # TODO: Implement your code generation logic here
+            code_agent_impl.submit_pr(full_repo_name, issue_title, issue_body)
 
             response = code_agent_pb2.IssueFixResponse()
             response.pull_request_url = f"https://github.com/{full_repo_name}/pull/94949"
