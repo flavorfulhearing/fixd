@@ -6,9 +6,7 @@ from langchain.output_parsers import PydanticOutputParser
 from codegen import CodeAgent, Codebase
 from codegen.extensions.langchain.tools import (
     GithubCreatePRTool,
-    GithubViewPRTool,
     GithubCreatePRCommentTool,
-    GithubCreatePRReviewCommentTool
 )
 
 # Define the response schema
@@ -42,9 +40,7 @@ def submit_pr(full_repo_name: str, issue_title: str, issue_body: str) -> str:
         ]
     )
 
-    # Create parser
     parser = PydanticOutputParser(pydantic_object=AgentResponse)
-
     prompt = f'''
     You are an expert software engineer. Your task is to analyze the codebase, analyze the GitHub issue, and submit a PR that fixes the issue. 
     The issue title is: {issue_title}
