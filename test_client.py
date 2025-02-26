@@ -4,13 +4,9 @@ from code_agent import code_agent_pb2
 from code_agent import code_agent_pb2_grpc
 
 def test_fix_issue():
-    # Create a channel
     channel = grpc.insecure_channel('localhost:50051')
-    
-    # Create a stub (client)
     stub = code_agent_pb2_grpc.CodeAgentStub(channel)
     
-    # Create a request
     issue = code_agent_pb2.Issue(
         title="Test Issue",
         body="This is a test issue body"
@@ -22,7 +18,6 @@ def test_fix_issue():
     )
     
     try:
-        # Make the call
         response = stub.FixIssue(request)
         print(f"Success! Pull request URL: {response.pull_request_url}")
     except grpc.RpcError as e:
@@ -30,4 +25,4 @@ def test_fix_issue():
         print(f"Error: {e.with_traceback()}")
 
 if __name__ == '__main__':
-    test_fix_issue() 
+    test_fix_issue()
