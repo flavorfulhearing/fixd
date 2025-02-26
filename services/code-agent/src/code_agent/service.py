@@ -31,16 +31,13 @@ class CodeAgentService(code_agent_pb2_grpc.CodeAgentServicer):
             logger.info(f"Issue title: {issue_title}")
             logger.info(f"Issue body: {issue_body}")
 
-            # TODO: Implement your code generation logic here
-            code_agent_impl.submit_pr(full_repo_name, issue_title, issue_body)
-
-            response = code_agent_pb2.IssueFixResponse()
-            response.pull_request_url = f"https://github.com/{full_repo_name}/pull/94949"
+            github_pr_url = code_agent_impl.submit_pr(full_repo_name, issue_title, issue_body)
+            response = code_agent_pb2.IssueFixResponse(pull_request_url=github_pr_url)
             logger.info(f"Returning response with PR URL: {response.pull_request_url}")
             return response
 
         except Exception as e:
-            logger.error(f"Error fixing issue: {str(e)}", exc_info=True)
+            logger.error(f"Error: {str(e)}", exc_info=True)
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(f'Error fixing issue: {str(e)}')
             return code_agent_pb2.IssueFixResponse()
