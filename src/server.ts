@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import { OpenAI } from 'openai';
-import { createGenerateCode } from './issue-to-code.js';
+import { createGenerateCode } from 'src/red-to-blue';
 import { createPullRequest } from './pull-request-submitter.js';
 import { getRepositoryFiles } from './file-fetcher.js';
 
