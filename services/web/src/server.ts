@@ -35,24 +35,16 @@ app.post('/webhook', async (req: Request, res: Response) => {
       const repoName = payload.repository.name;
       const owner = payload.repository.owner.login;
       const fullRepoName = `${owner}/${repoName}`;
-      console.log("Before code agent client");
 
       const issue: Issue = {
         title: issueTitle,
         body: issueBody,
       }
-
       const issueFixRequest: IssueFixRequest = {
         fullRepoName,
         issue,
       }
-
       const result = await callIssueFix(issueFixRequest);
-
-      
-      console.log('Result from code agent client: ', result);
-      console.log('After code agent client');
-
       res.status(200).json({
         message: 'Pull request created!',
       });
