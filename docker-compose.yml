@@ -1,0 +1,18 @@
+  version: '3.8'
+
+  services:
+    web:
+      build:
+        context: ./services/web
+      ports:
+        - "3000:3000"
+      environment:
+        - CODE_AGENT_HOST=code-agent
+      depends_on:
+        - code-agent
+
+    code-agent:
+      build:
+        context: ./services/code-agent
+      ports:
+        - "50051:50051"

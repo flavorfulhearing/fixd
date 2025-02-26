@@ -1,0 +1,40 @@
+{
+  "type": "module",
+  "engines": {
+    "node": ">=20.17.19",
+    "npm": ">=10.5.0"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.40",
+    "@langchain/openai": "^0.4.4",
+    "@octokit/rest": "^21.1.1",
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "langchain": "^0.3.19",
+    "octokit": "^4.1.2",
+    "openai": "^4.85.1",
+    "smee-client": "^2.0.4"
+  },
+  "devDependencies": {
+    "@grpc/grpc-js": "^1.12.6",
+    "@grpc/proto-loader": "^0.7.13",
+    "@types/body-parser": "^1.19.5",
+    "@types/express": "^5.0.0",
+    "@types/node": "^20.17.19",
+    "concurrently": "^9.1.2",
+    "grpc_tools_node_protoc_ts": "^5.3.3",
+    "grpc-tools": "^1.13.0",
+    "ts-proto": "^2.6.1",
+    "typescript": "^5.7.3",
+    "wait-on": "^8.0.2"
+  },
+  "scripts": {
+    "dev": "concurrently \"tsx watch src/server.ts\" \"wait-on tcp:3000 && smee -u https://smee.io/gS8YvXqDQpz1436s -t http://localhost:3000/webhook\"",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "format": "prettier --write \"src/**/*.{js,ts}\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts}\"",
+    "generate-proto": "mkdir -p src/generated && protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/generated --ts_proto_opt=esModuleInterop=true,outputServices=grpc-js,env=node -I../../proto ../../proto/code_agent.proto"
+  }
+}
