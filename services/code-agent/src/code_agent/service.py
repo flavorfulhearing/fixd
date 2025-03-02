@@ -4,7 +4,7 @@ import logging
 import sys
 from . import code_agent_pb2
 from . import code_agent_pb2_grpc
-from . import code_agent_impl
+from services.code-agent.src.code_agent.code_is_so_cool import code_agent_impl
 
 # Configure logging
 logging.basicConfig(
