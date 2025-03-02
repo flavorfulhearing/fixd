@@ -29,6 +29,8 @@ testpaths = [
 ]
 
 [tool.ruff]
-select = ["E", "F", "I"]
+select = ["E", "F", "I", "B", "C4", "ARG", "SIM", "ERA", "PL"]
 ignore = []
 line-length = 88
+target-version = "py312"  # Match your Python version
+extend-exclude = ["**/protos"]
